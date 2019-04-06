@@ -22,14 +22,17 @@ let storyIndex = 0;
 io.on("connection", function(socket) {
   console.log("User connected");
 
-  //not relable
+  //not reliable user count so i keep votersSelectedNumbers
   //console.log(io.sockets.server.httpServer._connections); //output in number
 
   let interval;
+
+  // votes
   socket.on("change vote", vote => {
     console.log("Vote Changed to: ", vote);
   });
 
+  // final point and story index
   socket.on("add story point", pointAndIndex => {
     stories[storyIndex].storyPoint = pointAndIndex.point;
     stories[storyIndex].Status = "Voted";
@@ -42,10 +45,12 @@ io.on("connection", function(socket) {
     });
   });
 
+  //story list
   socket.on("add story", story => {
     console.log("added story to: ", story);
     stories = story;
 
+    //story is updating every 2 second
     interval = setInterval(function() {
       console.log("story is updating every 2 second ..." + story);
       io.sockets.emit("add story", stories);
@@ -54,12 +59,14 @@ io.on("connection", function(socket) {
     //io.sockets.emit("add story", story);
   });
 
+  //count of voters
   socket.on("voters number", vnumber => {
     console.log("voters number: ", vnumber);
     voterNumer = vnumber;
     io.sockets.emit("voters number", vnumber);
   });
 
+  //selected voter number for active story
   socket.on("selected number", snumber => {
     console.log("selected Number:", snumber);
 
@@ -67,6 +74,7 @@ io.on("connection", function(socket) {
     console.log(votersSelectedNumbers);
     console.log("length:" + votersSelectedNumbers.length);
 
+    //not reliable user count so i keep votersSelectedNumbers
     if (voterNumer == votersSelectedNumbers.length - 1) {
       io.sockets.emit("selected number", votersSelectedNumbers);
       console.log("All voters voted!");
@@ -75,6 +83,7 @@ io.on("connection", function(socket) {
   });
 
   socket.on("disconnect", function() {
+    //not reliable user _connections and  clientsCount
     if (
       io.sockets.server.httpServer._connections *
         io.sockets.server.engine.clientsCount ==
@@ -83,6 +92,7 @@ io.on("connection", function(socket) {
       votersSelectedNumbers = [];
       storyIndex = 0;
     }
+    // kill story interval
     clearInterval(interval);
   });
 });

@@ -14,6 +14,7 @@ class AddStoryList extends Component {
     endpoint: "localhost:3001"
   };
 
+  //validate inputs
   validate = () => {
     const options = { abortEarly: false };
     const error = Joi.validate(this.state.data, this.schema, options);
@@ -27,6 +28,7 @@ class AddStoryList extends Component {
   validateProperty = (name, value) => {
     let schema = {};
 
+    //voters number and name has differnt schema
     switch (name) {
       case "name":
         schema.name = Joi.string()
@@ -51,6 +53,7 @@ class AddStoryList extends Component {
   handleChangeName = ({ currentTarget: input }) => {
     const errorMessage = this.validateProperty("name", input.value);
 
+    //handle errors
     let error = { ...this.state.errors };
     if (errorMessage) {
       error.name = errorMessage;
@@ -63,6 +66,7 @@ class AddStoryList extends Component {
   handleChangeNumber = ({ currentTarget: input }) => {
     const errorMessage = this.validateProperty("votersNumber", input.value);
 
+    //handle errors
     let error = { ...this.state.errors };
     if (errorMessage) {
       error.votersNumber = errorMessage;
@@ -96,7 +100,7 @@ class AddStoryList extends Component {
       storyArray.push({ story: story, storyPoint: "", Status: "Not Voted" })
     );
 
-    socket.emit("voters number", this.state.votersNumber);
+    socket.emit("voters number", this.state.votersNumber); //send number of voters
     socket.emit("add story", storyArray); // voter 'voted' to this.state.voter
   };
 

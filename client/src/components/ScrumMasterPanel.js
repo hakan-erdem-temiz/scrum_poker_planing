@@ -14,9 +14,11 @@ class ScrumMasterPanel extends Component {
   };
 
   componentDidMount = () => {
+    //sending sockets
     const socket = socketIOClient(this.state.endpoint);
     socket.on("voters number", votersNumber => {
       let voters = [];
+      //initialize voters data at begining
       for (let i = 1; i <= votersNumber; i++) {
         voters.push({
           voter: `voter ${i} : `,
@@ -27,6 +29,7 @@ class ScrumMasterPanel extends Component {
       this.setState({ voters });
     });
 
+    //taking active story data
     socket.on("add story point", pointAndIndex => {
       let storyNumber = pointAndIndex.index;
       storyNumber++;
@@ -36,16 +39,20 @@ class ScrumMasterPanel extends Component {
 
   componentDidUpdate = () => {
     const socket = socketIOClient(this.state.endpoint);
+
+    //populate voters and admin
     socket.on("selected number", selectedNumbers => {
       let voters = [];
       if (selectedNumbers.length > 1) {
         this.setState({ isVoteDone: true });
         let voteNumber = 1;
         for (let i = 0; i < selectedNumbers.length; i++) {
+          //I dont want to add admin as voter
           if (selectedNumbers[i].isAdmin) {
             this.setState({ adminVote: selectedNumbers[i].number });
             continue; //this is admin not voter
           }
+
           voters.push({
             voter: `voter ${voteNumber} : `,
             vote: selectedNumbers[i].number
@@ -66,8 +73,7 @@ class ScrumMasterPanel extends Component {
       index: ""
     });
 
-    //reset  voters
-
+    //resetting  voters
     let voters = [];
     for (let i = 1; i <= this.state.voters.length; i++) {
       voters.push({
@@ -76,9 +82,10 @@ class ScrumMasterPanel extends Component {
       });
     }
 
+    //resetting  voters
     this.setState({ voters });
 
-    //reset
+    //reset state
     this.setState({ isVoteDone: false });
   };
 

@@ -24,12 +24,16 @@ class ActiveStory extends Component {
     }); // voter 'voted' to this.state.voter
   };
 
+  //admin panel is scrum master and differnt from developers
   componentDidMount = () => {
     this.setState({ isAdmin: this.props.isAdmin ? this.props.isAdmin : false });
   };
 
   componentDidUpdate = () => {
+    //sending sockets
     const socket = socketIOClient(this.state.endpoint);
+
+    //handle final point and story index
     socket.on("add story point", pointAndIndex => {
       console.log("add story point is null");
       this.setState({ selectedNumber: null });
@@ -39,9 +43,11 @@ class ActiveStory extends Component {
       this.setState({ storyNumber });
     });
 
+    //End of session if all stories are voted
     socket.on("add story", story => {
       if (story.length < this.state.storyNumber) {
         this.setState({ sessionEnded: true });
+        //close socket
         socket.disconnect();
       }
     });

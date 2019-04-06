@@ -9,6 +9,7 @@ class StoryList extends Component {
   };
 
   componentDidMount = () => {
+    //taking stories at inital
     const socket = socketIOClient(this.state.endpoint);
     socket.on("add story", stories => {
       console.log("story");
