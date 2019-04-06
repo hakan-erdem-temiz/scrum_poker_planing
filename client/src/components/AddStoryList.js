@@ -3,14 +3,15 @@ import { connect } from "react-redux";
 import Joi from "joi-browser";
 import _ from "lodash";
 import { Link } from "react-router-dom";
-import { Button } from "react-bootstrap";
+import socketIOClient from "socket.io-client";
 
 class AddStoryList extends Component {
   state = {
     story: "",
     name: "",
     votersNumber: "",
-    errors: { name: "", votersNumber: "" }
+    errors: { name: "", votersNumber: "" },
+    endpoint: "localhost:3001"
   };
 
   validate = () => {
@@ -75,15 +76,6 @@ class AddStoryList extends Component {
     this.setState({ story: e.target.value });
   };
 
-  handleSubmit = e => {
-    e.preventDefault();
-
-    //call action creater
-    //todo savecomment
-
-    this.setState({ comment: "" });
-  };
-
   disableButton() {
     let className = "btn btn-light ";
     return className.concat(
@@ -91,6 +83,22 @@ class AddStoryList extends Component {
       _.isEmpty(this.state.errors) ? "" : "disabled"
     );
   }
+
+  // sending sockets
+  send = () => {
+    const socket = socketIOClient(this.state.endpoint);
+    //[{ story: "", storyPoint: 0, Status: "not voted" }]
+
+    let storyText = this.state.story.split("\n");
+    let storyArray = [];
+
+    storyText.map(story =>
+      storyArray.push({ story: story, storyPoint: "", Status: "Not Voted" })
+    );
+
+    socket.emit("voters number", this.state.votersNumber);
+    socket.emit("add story", storyArray); // voter 'voted' to this.state.voter
+  };
 
   render() {
     return (
@@ -132,8 +140,8 @@ class AddStoryList extends Component {
           <textarea
             style={{ width: "100%", resize: "none", height: 300 }}
             placeholder="exp. Story1"
-            onChange={this.handleChange}
-            value={this.state.handleChangeStory}
+            onChange={this.handleChangeStory}
+            value={this.state.story}
           />
           <div>
             <Link
@@ -146,12 +154,15 @@ class AddStoryList extends Component {
                 borderColor: "black"
               }}
               to="/ScrumMasterView"
+              onClick={() => this.send()}
             >
               Start Session
             </Link>
 
-            {Object.values(this.state.errors).map(e => (
-              <p style={{ color: "red" }}>{e}</p>
+            {Object.values(this.state.errors).map((e, i) => (
+              <p key={i} style={{ color: "red" }}>
+                {e}
+              </p>
             ))}
           </div>
         </form>

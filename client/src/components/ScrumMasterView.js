@@ -13,7 +13,7 @@ class ScrumMasterView extends Component {
         </div>
         <div className="col-md-4">
           <h4>Active Story</h4>
-          <ActiveStory />
+          <ActiveStory isAdmin={true} />
         </div>
         <div className="col-md-4">
           <h4>Scrum Master Panel</h4>

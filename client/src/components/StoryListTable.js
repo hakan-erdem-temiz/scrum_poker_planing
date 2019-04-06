@@ -1,20 +1,30 @@
 import React, { Component } from "react";
 import Table from "../common/table";
+import socketIOClient from "socket.io-client";
+
 class StoryList extends Component {
-  m = [
-    {
-      story: "story1",
-      storyPoint: "5",
-      status: "voted"
-    },
-    {
-      story: "story2",
-      storyPoint: "6",
-      status: "not voted"
-    }
-  ];
+  state = {
+    stories: [],
+    endpoint: "localhost:3001"
+  };
+
+  componentDidMount = () => {
+    const socket = socketIOClient(this.state.endpoint);
+    socket.on("add story", stories => {
+      console.log("story");
+      if (stories != this.state.stories) this.setState({ stories });
+      console.log(stories);
+      console.log("story");
+    });
+  };
+
   render() {
-    return <Table columns={["Story", "Story Point", "Status"]} data={this.m} />;
+    return (
+      <Table
+        columns={["Story", "Story Point", "Status"]}
+        data={this.state.stories}
+      />
+    );
   }
 }
 

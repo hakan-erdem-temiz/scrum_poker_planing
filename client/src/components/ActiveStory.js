@@ -1,18 +1,54 @@
 import React, { Component } from "react";
 import _ from "lodash";
+import socketIOClient from "socket.io-client";
 
 class ActiveStory extends Component {
   state = {
-    selectedNumber: null
+    storyNumber: 1,
+    selectedNumber: null,
+    endpoint: "localhost:3001",
+    vote: 0,
+    isAdmin: null,
+    sessionEnded: false
   };
 
   hanleClick = number => {
     this.setState({ selectedNumber: number });
     console.log(number);
+
+    //sending sockets
+    const socket = socketIOClient(this.state.endpoint);
+    socket.emit("selected number", {
+      isAdmin: this.state.isAdmin,
+      number: number
+    }); // voter 'voted' to this.state.voter
   };
+
+  componentDidMount = () => {
+    this.setState({ isAdmin: this.props.isAdmin ? this.props.isAdmin : false });
+  };
+
+  componentDidUpdate = () => {
+    const socket = socketIOClient(this.state.endpoint);
+    socket.on("add story point", pointAndIndex => {
+      console.log("add story point is null");
+      this.setState({ selectedNumber: null });
+
+      let storyNumber = pointAndIndex.index;
+      storyNumber++;
+      this.setState({ storyNumber });
+    });
+
+    socket.on("add story", story => {
+      if (story.length < this.state.storyNumber) {
+        this.setState({ sessionEnded: true });
+        socket.disconnect();
+      }
+    });
+  };
+
   render() {
     const numbers = [1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 134, 223];
-
     return (
       <div>
         <div className="row">
@@ -26,8 +62,9 @@ class ActiveStory extends Component {
                         <button
                           type="button"
                           disabled={
-                            this.state.selectedNumber != null &&
-                            this.state.selectedNumber !== number
+                            this.state.sessionEnded ||
+                            (this.state.selectedNumber != null &&
+                              this.state.selectedNumber !== number)
                           }
                           className="btn btn-light"
                           style={{
@@ -58,6 +95,8 @@ class ActiveStory extends Component {
             <p>
               {this.state.selectedNumber
                 ? `${this.state.selectedNumber} Voted`
+                : this.state.sessionEnded
+                ? "Session Ended Thanks!"
                 : "Please Vote !!!"}
             </p>
           </div>
